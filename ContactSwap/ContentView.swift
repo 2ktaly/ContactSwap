@@ -1,80 +1,116 @@
-//
-//  ContentView.swift
-//  ContactSwap
-//
-//  Created by Enrico Frank on 28.07.26.
-//
-
 import SwiftUI
-import SwiftData
+import Contacts
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @StateObject private var store = AppStore()
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
-        NavigationViewWrapper {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        Group {
+            if store.hasAccess {
+                mainTabs
+            } else {
+                PermissionGateView(store: store)
             }
-#if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-#endif
-            .toolbar {
-#if os(iOS)
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-#endif
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+        }
+        .overlay { busyOverlay }
+        .alert(item: $store.alert) { alert in
+            Alert(
+                title: Text(alert.title),
+                message: Text(alert.message),
+                dismissButton: .default(Text("OK"))
+            )
+        }
+        .task {
+            await store.requestPermissionIfNeeded()
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Der Nutzer kann die Freigabe in den Einstellungen ändern,
+            // während die App im Hintergrund ist.
+            guard phase == .active else { return }
+            let wasBlocked = !store.hasAccess
+            store.refreshPermission()
+            if wasBlocked && store.hasAccess {
+                Task { await store.reloadAll() }
             }
         }
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
+    private var mainTabs: some View {
+        TabView {
+            BackupView(store: store)
+                .tabItem { Label("Sichern", systemImage: "square.and.arrow.down") }
+
+            SwapView(store: store)
+                .tabItem { Label("Swap", systemImage: "arrow.left.arrow.right") }
+
+            RestoreView(store: store)
+                .tabItem { Label("Zurück", systemImage: "arrow.uturn.backward") }
+
+            SettingsView(store: store)
+                .tabItem { Label("Info", systemImage: "info.circle") }
         }
     }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    @ViewBuilder
+    private var busyOverlay: some View {
+        if let message = store.busyMessage {
+            ZStack {
+                Color.black.opacity(0.35).ignoresSafeArea()
+                VStack(spacing: 14) {
+                    ProgressView()
+                        .controlSize(.large)
+                    Text(message)
+                        .font(.callout)
+                        .multilineTextAlignment(.center)
+                }
+                .padding(28)
+                .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
             }
+            .transition(.opacity)
         }
     }
 }
 
-fileprivate struct NavigationViewWrapper<Content: View>: View {
-    let content: () -> Content
+struct PermissionGateView: View {
+    @ObservedObject var store: AppStore
 
     var body: some View {
-#if os(macOS)
-        NavigationSplitView {
-            content()
-        } detail: {
-            Text("Select an item")
+        VStack(spacing: 20) {
+            Image(systemName: "person.crop.circle.badge.exclamationmark")
+                .font(.system(size: 56))
+                .foregroundStyle(.orange)
+
+            Text("Zugriff auf Kontakte nötig")
+                .font(.title2.bold())
+
+            Text("ContactSwap sichert dein Adressbuch, bevor etwas entfernt wird. Ohne Kontakt-Freigabe kann die App weder sichern noch wiederherstellen.")
+                .font(.callout)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            if store.permission == .notDetermined {
+                Button("Zugriff erlauben") {
+                    Task { await store.requestPermissionIfNeeded() }
+                }
+                .buttonStyle(.borderedProminent)
+            } else {
+                Button("Einstellungen öffnen") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                .buttonStyle(.borderedProminent)
+
+                Text("Datenschutz & Sicherheit → Kontakte → ContactSwap")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
-#else
-        content()
-#endif
+        .padding(32)
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
