@@ -6,6 +6,7 @@ struct SwapView: View {
     @State private var keptIDs: Set<String> = []
     @State private var searchText = ""
     @State private var showConfirmation = false
+    @State private var showingInfo = false
 
     var body: some View {
         NavigationStack {
@@ -22,12 +23,26 @@ struct SwapView: View {
             }
             .navigationTitle("Swap")
             .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showingInfo = true
+                    } label: {
+                        Image(systemName: "info.circle")
+                    }
+                    .accessibilityLabel("Info zum Ablauf")
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
                     Button("Leeren") { showConfirmation = true }
+                        .buttonStyle(.borderedProminent)
+                        .tint(.blue)
                         .disabled(store.deviceContacts.isEmpty || store.busyMessage != nil)
                 }
             }
             .searchable(text: $searchText, prompt: "Kontakt suchen")
+            .sheet(isPresented: $showingInfo) {
+                InfoView()
+            }
             .confirmationDialog(
                 "Adressbuch leeren?",
                 isPresented: $showConfirmation,
@@ -47,12 +62,6 @@ struct SwapView: View {
 
     private var contactList: some View {
         List {
-            Section {
-                Text("Wähle die Kontakte aus, die im Adressbuch bleiben sollen. Alle anderen werden entfernt – vorher legt die App automatisch ein vollständiges Backup an.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-
             Section("Behalten (\(keptIDs.count) von \(store.deviceContacts.count))") {
                 ForEach(filteredContacts) { contact in
                     Button {

@@ -38,9 +38,6 @@ struct ContentView: View {
 
     private var mainTabs: some View {
         TabView {
-            BackupView(store: store)
-                .tabItem { Label("Sichern", systemImage: "square.and.arrow.down") }
-
             SwapView(store: store)
                 .tabItem { Label("Swap", systemImage: "arrow.left.arrow.right") }
 
@@ -48,7 +45,7 @@ struct ContentView: View {
                 .tabItem { Label("Zurück", systemImage: "arrow.uturn.backward") }
 
             SettingsView(store: store)
-                .tabItem { Label("Info", systemImage: "info.circle") }
+                .tabItem { Label("Einstellungen", systemImage: "gearshape") }
         }
     }
 
