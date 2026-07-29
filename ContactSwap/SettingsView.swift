@@ -4,7 +4,7 @@ import Contacts
 struct SettingsView: View {
     @ObservedObject var store: AppStore
 
-    @State private var showingGoogleGuide = false
+    @State private var showingSyncGuide = false
     @State private var showingDisguiseGuide = false
     @State private var selectedIcon = AppIconOption.all[0]
 
@@ -19,7 +19,7 @@ struct SettingsView: View {
             }
             .navigationTitle("Einstellungen")
             .refreshable { await store.reloadAll() }
-            .sheet(isPresented: $showingGoogleGuide) { GoogleSyncGuideView() }
+            .sheet(isPresented: $showingSyncGuide) { SyncGuideView() }
             .sheet(isPresented: $showingDisguiseGuide) { DisguiseGuideView() }
             .onAppear { selectedIcon = AppIconManager.current }
         }
@@ -108,9 +108,9 @@ struct SettingsView: View {
     private var contactsSection: some View {
         Section {
             Button {
-                showingGoogleGuide = true
+                showingSyncGuide = true
             } label: {
-                Label("Google-Sync deaktivieren", systemImage: "exclamationmark.triangle.fill")
+                Label("Kontakt-Syncs abschalten", systemImage: "exclamationmark.triangle.fill")
             }
 
             Button {

@@ -4,7 +4,7 @@ import SwiftUI
 /// auf der Swap-Seite – dort, wo die Fragen tatsächlich aufkommen.
 struct InfoView: View {
     @Environment(\.dismiss) private var dismiss
-    @State private var showingGoogleGuide = false
+    @State private var showingSyncGuide = false
 
     var body: some View {
         NavigationStack {
@@ -15,22 +15,22 @@ struct InfoView: View {
                 }
 
                 Section("Ablauf") {
-                    StepRow(number: 1, text: "Google-Sync in den iOS-Einstellungen abschalten.")
+                    StepRow(number: 1, text: "Alle Kontakt-Syncs abschalten – iCloud zuerst, es ist fast immer aktiv.")
                     StepRow(number: 2, text: "Unter „Swap“ die Kontakte auswählen, die bleiben sollen, und auf „Leeren“ tippen.")
                     StepRow(number: 3, text: "In der Ziel-App die Kontaktfreigabe erteilen und die Vorschläge auswerten.")
-                    StepRow(number: 4, text: "Unter „Zurück“ das Backup wieder einspielen.")
+                    StepRow(number: 4, text: "Unter „Zurück“ das Backup wieder einspielen, dann die Syncs wieder einschalten.")
                 }
 
                 Section {
                     Button {
-                        showingGoogleGuide = true
+                        showingSyncGuide = true
                     } label: {
-                        Label("Google-Sync deaktivieren", systemImage: "exclamationmark.triangle.fill")
+                        Label("Kontakt-Syncs abschalten", systemImage: "exclamationmark.triangle.fill")
                     }
                 } header: {
                     Text("Vor der Recherche")
                 } footer: {
-                    Text("Ist der Google-Kontakte-Sync aktiv, spielt Google gelöschte Kontakte binnen Minuten zurück – die Recherche wird dadurch unbrauchbar.")
+                    Text("Zwei Gefahren, die sich unterscheiden: iCloud trägt die Löschung auf alle Apple-Geräte weiter. Google, Exchange und CardDAV-Konten spielen Kontakte dagegen vom Server zurück und machen die Recherche unbrauchbar. Welche Quellen hier laufen, steht unter „Einstellungen“.")
                 }
 
                 Section {
@@ -54,8 +54,8 @@ struct InfoView: View {
                     Button("Fertig") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showingGoogleGuide) {
-                GoogleSyncGuideView()
+            .sheet(isPresented: $showingSyncGuide) {
+                SyncGuideView()
             }
         }
     }
@@ -77,50 +77,6 @@ struct StepRow: View {
                 .font(.callout)
         }
         .padding(.vertical, 2)
-    }
-}
-
-struct GoogleSyncGuideView: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    Text("Google synchronisiert Kontakte in beide Richtungen. Löschst du sie auf dem iPhone, kann Google sie vom Server zurückspielen – oft innerhalb weniger Minuten.")
-                        .font(.callout)
-                }
-
-                Section("So schaltest du den Sync ab") {
-                    StepRow(number: 1, text: "Einstellungen → Apps → Kontakte → Kontakte-Accounts")
-                    StepRow(number: 2, text: "Google-Account antippen")
-                    StepRow(number: 3, text: "Schalter „Kontakte“ ausschalten")
-                    StepRow(number: 4, text: "„Von meinem iPhone löschen“ bestätigen – die Daten bleiben bei Google erhalten")
-                }
-
-                Section("Danach wieder einschalten") {
-                    Text("Denselben Weg gehen und den Schalter „Kontakte“ wieder aktivieren. Warte damit, bis du das Backup zurückgespielt hast, sonst können Dubletten entstehen.")
-                        .font(.callout)
-                }
-
-                Section {
-                    Button {
-                        if let url = URL(string: UIApplication.openSettingsURLString) {
-                            UIApplication.shared.open(url)
-                        }
-                    } label: {
-                        Label("Einstellungen öffnen", systemImage: "gear")
-                    }
-                }
-            }
-            .navigationTitle("Google-Sync")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Fertig") { dismiss() }
-                }
-            }
-        }
     }
 }
 
