@@ -1,0 +1,33 @@
+Copyright (c) 2026 Enrico Frank. Alle Rechte vorbehalten.
+
+EINSEHBARER QUELLTEXT – KEINE OPEN-SOURCE-LIZENZ
+
+Dieser Quelltext wird ausschließlich zu dem Zweck offengelegt, die
+Funktionsweise der Anwendung überprüfbar zu machen – insbesondere die Zusage,
+dass die Anwendung keine Daten an Dritte übermittelt.
+
+GESTATTET IST:
+- das Lesen des Quelltextes
+- das Anfertigen einer Kopie ausschließlich zum Zweck dieser Überprüfung
+- das Melden von Fehlern und Sicherheitslücken an den Rechteinhaber
+
+NICHT GESTATTET IST, ohne vorherige schriftliche Zustimmung des
+Rechteinhabers:
+- die Vervielfältigung, Verbreitung oder öffentliche Zugänglichmachung des
+  Quelltextes oder von Teilen davon
+- die Verwendung des Quelltextes oder von Teilen davon in eigenen Werken,
+  gleich ob entgeltlich oder unentgeltlich
+- die Bearbeitung, Umgestaltung oder Weiterentwicklung
+- das Kompilieren und Verbreiten von Programmen, die auf diesem Quelltext
+  beruhen
+
+Ein Fork innerhalb der Plattform GitHub, soweit er durch deren
+Nutzungsbedingungen technisch ermöglicht wird, begründet keine über diese
+Lizenz hinausgehenden Nutzungsrechte.
+
+KEINE GEWÄHRLEISTUNG
+
+Die Software wird ohne jede Gewährleistung bereitgestellt. Der Rechteinhaber
+haftet nicht für Schäden, die aus ihrer Verwendung entstehen. Die Anwendung
+verändert und löscht Kontaktdaten; die Verantwortung für den Umgang mit diesen
+Daten liegt beim Anwender.

@@ -1,4 +1,5 @@
 import Foundation
+import CryptoKit
 
 class BackupService {
     static let shared = BackupService()
@@ -18,14 +19,16 @@ class BackupService {
         return dir
     }
 
-    private lazy var encoder: JSONEncoder = {
+    // Bewusst `let` statt `lazy var`: Die Methoden hier laufen über
+    // Task.detached auf Hintergrund-Threads, und `lazy` ist nicht thread-sicher.
+    private let encoder: JSONEncoder = {
         let e = JSONEncoder()
         e.dateEncodingStrategy = .iso8601
         e.outputFormatting = [.prettyPrinted, .sortedKeys]
         return e
     }()
 
-    private lazy var decoder: JSONDecoder = {
+    private let decoder: JSONDecoder = {
         let d = JSONDecoder()
         d.dateDecodingStrategy = .iso8601
         return d
@@ -34,11 +37,16 @@ class BackupService {
     // MARK: - Anlegen
 
     func createBackup(name: String, contacts: [Contact]) throws -> BackupFile {
+        let key = try BackupCrypto.loadKey()
         let backupID = UUID().uuidString
         let backupDirectory = backupsDirectory.appendingPathComponent(backupID, isDirectory: true)
         let photosDirectory = backupDirectory.appendingPathComponent(photosFolderName, isDirectory: true)
 
-        try fileManager.createDirectory(at: photosDirectory, withIntermediateDirectories: true)
+        try fileManager.createDirectory(
+            at: photosDirectory,
+            withIntermediateDirectories: true,
+            attributes: [.protectionKey: FileProtectionType.complete]
+        )
 
         // Fotos in Originalgröße als eigene Dateien ablegen, damit die JSON schlank bleibt.
         var storedContacts: [Contact] = []
@@ -49,7 +57,7 @@ class BackupService {
             if let imageData = contact.imageData, !imageData.isEmpty {
                 let filename = "\(photosFolderName)/\(sanitizedFilename(for: contact.id)).img"
                 let photoURL = backupDirectory.appendingPathComponent(filename)
-                try imageData.write(to: photoURL, options: .atomic)
+                try write(imageData, to: photoURL, with: key)
                 contact.photoPath = filename
                 totalPhotoSize += imageData.count
             } else {
@@ -68,10 +76,10 @@ class BackupService {
             appVersion: Bundle.main.shortVersion
         )
 
-        try encoder.encode(storedContacts)
-            .write(to: backupDirectory.appendingPathComponent("contacts.json"), options: .atomic)
-        try encoder.encode(metadata)
-            .write(to: backupDirectory.appendingPathComponent("metadata.json"), options: .atomic)
+        try write(encoder.encode(storedContacts),
+                  to: backupDirectory.appendingPathComponent("contacts.json"), with: key)
+        try write(encoder.encode(metadata),
+                  to: backupDirectory.appendingPathComponent("metadata.json"), with: key)
 
         return BackupFile(metadata: metadata, contacts: storedContacts, backupDirectoryURL: backupDirectory)
     }
@@ -84,12 +92,15 @@ class BackupService {
             includingPropertiesForKeys: [.isDirectoryKey],
             options: [.skipsHiddenFiles]
         )
+        guard !entries.isEmpty else { return [] }
+
+        let key = try BackupCrypto.loadKey()
 
         var backups: [BackupMetadata] = []
         for url in entries {
             let metadataFile = url.appendingPathComponent("metadata.json")
             guard fileManager.fileExists(atPath: metadataFile.path) else { continue }
-            guard let data = try? Data(contentsOf: metadataFile),
+            guard let data = try? read(metadataFile, with: key),
                   let metadata = try? decoder.decode(BackupMetadata.self, from: data) else { continue }
             backups.append(metadata)
         }
@@ -99,21 +110,22 @@ class BackupService {
 
     /// Lädt ein Backup inklusive der Fotos zurück in den Speicher.
     func loadBackup(byID id: String) throws -> BackupFile {
+        let key = try BackupCrypto.loadKey()
         let backupDirectory = backupsDirectory.appendingPathComponent(id, isDirectory: true)
 
         let metadata = try decoder.decode(
             BackupMetadata.self,
-            from: Data(contentsOf: backupDirectory.appendingPathComponent("metadata.json"))
+            from: read(backupDirectory.appendingPathComponent("metadata.json"), with: key)
         )
         var contacts = try decoder.decode(
             [Contact].self,
-            from: Data(contentsOf: backupDirectory.appendingPathComponent("contacts.json"))
+            from: read(backupDirectory.appendingPathComponent("contacts.json"), with: key)
         )
 
         for index in contacts.indices {
             guard let photoPath = contacts[index].photoPath else { continue }
             let photoURL = backupDirectory.appendingPathComponent(photoPath)
-            contacts[index].imageData = try? Data(contentsOf: photoURL)
+            contacts[index].imageData = try? read(photoURL, with: key)
         }
 
         return BackupFile(metadata: metadata, contacts: contacts, backupDirectoryURL: backupDirectory)
@@ -130,6 +142,7 @@ class BackupService {
     /// Legt eine zweite, unabhängige Kopie des Backups an (doppelt gesichert).
     @discardableResult
     func duplicateBackup(fromID sourceID: String, newName: String) throws -> BackupMetadata {
+        let key = try BackupCrypto.loadKey()
         let sourceDirectory = backupsDirectory.appendingPathComponent(sourceID, isDirectory: true)
         let newID = UUID().uuidString
         let newDirectory = backupsDirectory.appendingPathComponent(newID, isDirectory: true)
@@ -138,7 +151,7 @@ class BackupService {
 
         let original = try decoder.decode(
             BackupMetadata.self,
-            from: Data(contentsOf: newDirectory.appendingPathComponent("metadata.json"))
+            from: read(newDirectory.appendingPathComponent("metadata.json"), with: key)
         )
 
         let copy = BackupMetadata(
@@ -151,10 +164,24 @@ class BackupService {
             appVersion: original.appVersion
         )
 
-        try encoder.encode(copy)
-            .write(to: newDirectory.appendingPathComponent("metadata.json"), options: .atomic)
+        try write(encoder.encode(copy),
+                  to: newDirectory.appendingPathComponent("metadata.json"), with: key)
 
         return copy
+    }
+
+    // MARK: - Verschlüsselt lesen und schreiben
+
+    /// Schreibt verschlüsselt und mit vollem Dateischutz: Selbst wer die Datei
+    /// aus dem Container zieht, bekommt ohne den Schlüssel aus dem Keychain
+    /// dieses Geräts nichts zu sehen.
+    private func write(_ data: Data, to url: URL, with key: SymmetricKey) throws {
+        try BackupCrypto.seal(data, with: key)
+            .write(to: url, options: [.atomic, .completeFileProtection])
+    }
+
+    private func read(_ url: URL, with key: SymmetricKey) throws -> Data {
+        try BackupCrypto.open(Data(contentsOf: url), with: key)
     }
 
     // MARK: - Hilfen

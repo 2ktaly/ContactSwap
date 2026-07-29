@@ -10,12 +10,17 @@ final class AppStore: ObservableObject {
     @Published var permission: CNAuthorizationStatus = CNContactStore.authorizationStatus(for: .contacts)
     @Published var backups: [BackupMetadata] = []
     @Published var deviceContacts: [Contact] = []
+    @Published var sources: [ContactSource] = []
 
     @Published var busyMessage: String?
     @Published var alert: AppAlert?
     @Published var verification: VerificationReport?
 
     var hasAccess: Bool { permission == .authorized || permission == .limited }
+
+    /// Quellen, die an einem Server hängen. Solange hier etwas steht, wirkt
+    /// ein Swap über das iPhone hinaus.
+    var syncedSources: [ContactSource] { sources.filter { $0.kind.isSynced } }
 
     // MARK: - Berechtigung
 
@@ -38,6 +43,16 @@ final class AppStore: ObservableObject {
     func reloadAll() async {
         await reloadBackups()
         await reloadDeviceContacts()
+        await reloadSources()
+    }
+
+    func reloadSources() async {
+        guard hasAccess else { return }
+        do {
+            sources = try await run { try ContactService.shared.fetchSources() }
+        } catch {
+            alert = .error("Kontaktquellen konnten nicht gelesen werden", error)
+        }
     }
 
     func reloadBackups() async {

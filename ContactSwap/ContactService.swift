@@ -65,6 +65,38 @@ final class ContactService {
         }
     }
 
+    // MARK: - Quellen
+
+    /// Liest alle Kontakt-Container des Geräts.
+    ///
+    /// iCloud und Google erscheinen beide als CardDAV – iOS unterscheidet sie nur
+    /// über den Namen, den der jeweilige Account vergeben hat.
+    func fetchSources() throws -> [ContactSource] {
+        let containers = try contactStore.containers(matching: nil)
+
+        return containers.map { container in
+            let kind = ContactSource.Kind(container.type)
+            return ContactSource(
+                id: container.identifier,
+                // Der lokale Container trägt oft gar keinen Namen.
+                name: container.name.isEmpty
+                    ? (kind == .local ? "Auf diesem iPhone" : "Unbenannte Quelle")
+                    : container.name,
+                kind: kind,
+                contactCount: countContacts(inContainer: container.identifier)
+            )
+        }
+    }
+
+    /// Zählt die Kontakte einer Quelle. Verknüpfte Karten, die in mehreren
+    /// Quellen liegen, tauchen in jeder davon auf – die Summe kann also über
+    /// der Gesamtzahl im Adressbuch liegen.
+    private func countContacts(inContainer identifier: String) -> Int {
+        let predicate = CNContact.predicateForContactsInContainer(withIdentifier: identifier)
+        let keys = [CNContactIdentifierKey as CNKeyDescriptor]
+        return (try? contactStore.unifiedContacts(matching: predicate, keysToFetch: keys).count) ?? 0
+    }
+
     // MARK: - Lesen
 
     /// Liest alle Kontakte samt sämtlicher Felder.
