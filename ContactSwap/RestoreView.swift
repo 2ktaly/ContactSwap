@@ -5,7 +5,8 @@ struct RestoreView: View {
 
     @State private var selected: BackupMetadata?
     @State private var pendingDeletion: BackupMetadata?
-    @State private var replaceExisting = true
+    // Standardmäßig aus: Wiederherstellen soll für sich genommen nichts löschen.
+    @State private var replaceExisting = false
 
     var body: some View {
         NavigationStack {

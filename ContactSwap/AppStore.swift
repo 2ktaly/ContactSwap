@@ -16,6 +16,10 @@ final class AppStore: ObservableObject {
     @Published var alert: AppAlert?
     @Published var verification: VerificationReport?
 
+    /// Zählt mit, wie viele Swaps ohne Kauf noch offen sind. Wird nach jedem
+    /// Swap neu gelesen, damit die Oberfläche sofort nachzieht.
+    @Published var remainingFreeSwaps = SwapAllowance.remainingFreeSwaps
+
     var hasAccess: Bool { permission == .authorized || permission == .limited }
 
     /// Quellen, die an einem Server hängen. Solange hier etwas steht, wirkt
@@ -166,7 +170,18 @@ final class AppStore: ObservableObject {
 
     /// Sichert zuerst das gesamte Adressbuch und löscht danach alle Kontakte
     /// bis auf die ausgewählten. Ohne erfolgreiches Backup wird nichts gelöscht.
-    func swap(keeping keptIDs: Set<String>) async {
+    ///
+    /// `isUnlocked` kommt von außen herein, damit der Kaufzustand an einer
+    /// Stelle liegt und nicht doppelt geführt wird.
+    func swap(keeping keptIDs: Set<String>, isUnlocked: Bool) async {
+        guard isUnlocked || remainingFreeSwaps > 0 else {
+            alert = .info(
+                "Swap bereits genutzt",
+                "In der kostenlosen Fassung ist ein Swap enthalten. Unter „Einstellungen“ lässt sich die App dauerhaft freischalten – Wiederherstellen und Export bleiben ohnehin unbegrenzt möglich."
+            )
+            return
+        }
+
         busyMessage = "Sichere Kontakte …"
 
         do {
@@ -183,6 +198,13 @@ final class AppStore: ObservableObject {
             busyMessage = "Entferne Kontakte …"
             let toDelete = contacts.map(\.id).filter { !keptIDs.contains($0) }
             let deleted = try await run { try ContactService.shared.deleteContacts(byIdentifiers: toDelete) }
+
+            // Erst hier zählen: Ein abgebrochener Swap darf den Gratis-Swap
+            // nicht verbrauchen.
+            if !isUnlocked {
+                SwapAllowance.recordSwap()
+                remainingFreeSwaps = SwapAllowance.remainingFreeSwaps
+            }
 
             busyMessage = nil
             await reloadAll()

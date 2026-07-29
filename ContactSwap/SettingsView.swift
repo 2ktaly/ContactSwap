@@ -3,6 +3,7 @@ import Contacts
 
 struct SettingsView: View {
     @ObservedObject var store: AppStore
+    @ObservedObject var purchases: PurchaseStore
 
     @State private var showingSyncGuide = false
     @State private var showingDisguiseGuide = false
@@ -11,6 +12,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
+                purchaseSection
                 sourcesSection
                 appearanceSection
                 contactsSection
@@ -22,6 +24,58 @@ struct SettingsView: View {
             .sheet(isPresented: $showingSyncGuide) { SyncGuideView() }
             .sheet(isPresented: $showingDisguiseGuide) { DisguiseGuideView() }
             .onAppear { selectedIcon = AppIconManager.current }
+        }
+    }
+
+    // MARK: - Kauf
+
+    @ViewBuilder
+    private var purchaseSection: some View {
+        if purchases.isPurchased {
+            Section {
+                Label("Freigeschaltet", systemImage: "checkmark.seal.fill")
+                    .foregroundStyle(.green)
+            } header: {
+                Text("Fassung")
+            } footer: {
+                Text("Unbegrenzte Swaps, dauerhaft. Der Kauf gilt für alle Geräte mit derselben Apple-ID.")
+            }
+        } else {
+            Section {
+                LabeledContent("Swaps übrig", value: "\(store.remainingFreeSwaps) von \(SwapAllowance.freeLimit)")
+
+                Button {
+                    buy()
+                } label: {
+                    HStack {
+                        Label("Dauerhaft freischalten", systemImage: "lock.open.fill")
+                        Spacer()
+                        Text(purchases.priceText)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                .disabled(purchases.isLoading)
+                .accessibilityIdentifier("buy-lifetime")
+
+                Button("Kauf wiederherstellen") {
+                    restore()
+                }
+                .disabled(purchases.isLoading)
+                .accessibilityIdentifier("restore-purchase")
+            } header: {
+                Text("Fassung")
+            } footer: {
+                Text("Einmalig, kein Abonnement. Wiederherstellen, Export und Prüfen bleiben auch ohne Kauf unbegrenzt – die Begrenzung betrifft nur das Leeren des Adressbuchs.")
+            }
+
+            Section {
+                Link(destination: Self.bulkLicenseURL) {
+                    Label("Massenlizenzen für Behörden", systemImage: "building.columns")
+                }
+                .accessibilityIdentifier("bulk-licenses")
+            } footer: {
+                Text("Behörden und Institutionen beziehen Lizenzen im Bündel über Apple Business Manager. Auf der Website stehen der Ablauf und die Ansprechpartner.")
+            }
         }
     }
 
@@ -145,19 +199,54 @@ struct SettingsView: View {
 
     // MARK: - Quelltext
 
+    @ViewBuilder
     private var sourceCodeSection: some View {
         Section {
-            Link(destination: Self.repositoryURL) {
-                Label("Quelltext auf GitHub", systemImage: "curlybraces")
+            if purchases.isPurchased {
+                Link(destination: Self.repositoryURL) {
+                    Label("Quelltext auf GitHub", systemImage: "curlybraces")
+                }
+            } else {
+                Label("Quelltext für Freigeschaltete", systemImage: "curlybraces")
+                    .foregroundStyle(.secondary)
             }
         } header: {
             Text("Nachprüfbarkeit")
         } footer: {
-            Text("Der vollständige Quelltext ist einsehbar – so lässt sich prüfen, dass die App keine Daten verschickt. Einsehbar heißt nicht frei verwendbar: Vervielfältigung und Weitergabe sind laut Lizenz untersagt.")
+            Text(purchases.isPurchased
+                 ? "Der vollständige Quelltext ist einsehbar – so lässt sich prüfen, dass die App keine Daten verschickt. Einsehbar heißt nicht frei verwendbar: Vervielfältigung und Weitergabe sind laut Lizenz untersagt."
+                 : "Nach der Freischaltung steht der vollständige Quelltext zur Einsicht bereit. Damit lässt sich nachprüfen, dass die App keine Daten verschickt.")
         }
     }
 
     static let repositoryURL = URL(string: "https://github.com/2ktaly/ContactSwap")!
+    static let bulkLicenseURL = URL(string: "https://websitewerker.com/conswa/behoerden")!
+
+    // MARK: - Kaufvorgang
+
+    private func buy() {
+        Task {
+            switch await purchases.purchase() {
+            case .purchased:
+                store.alert = .info("Freigeschaltet", "Ab jetzt sind Swaps unbegrenzt möglich.")
+            case .pending:
+                store.alert = .info("Kauf angefragt", "Der Kauf muss noch bestätigt werden. Die Freischaltung erfolgt danach von selbst.")
+            case .cancelled:
+                break
+            case .failed(let reason):
+                store.alert = .info("Kauf nicht abgeschlossen", reason)
+            }
+        }
+    }
+
+    private func restore() {
+        Task {
+            let restored = await purchases.restore()
+            store.alert = restored
+                ? .info("Kauf gefunden", "Die App ist freigeschaltet.")
+                : .info("Kein Kauf gefunden", "Unter dieser Apple-ID liegt kein Kauf vor.")
+        }
+    }
 
     // MARK: - Hilfen
 

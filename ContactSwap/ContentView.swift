@@ -3,6 +3,7 @@ import Contacts
 
 struct ContentView: View {
     @StateObject private var store = AppStore()
+    @StateObject private var purchases = PurchaseStore()
     @Environment(\.scenePhase) private var scenePhase
 
     var body: some View {
@@ -24,6 +25,9 @@ struct ContentView: View {
         .task {
             await store.requestPermissionIfNeeded()
         }
+        .task {
+            await purchases.load()
+        }
         .onChange(of: scenePhase) { _, phase in
             // Der Nutzer kann die Freigabe in den Einstellungen ändern,
             // während die App im Hintergrund ist.
@@ -38,13 +42,13 @@ struct ContentView: View {
 
     private var mainTabs: some View {
         TabView {
-            SwapView(store: store)
+            SwapView(store: store, purchases: purchases)
                 .tabItem { Label("Swap", systemImage: "arrow.left.arrow.right") }
 
             RestoreView(store: store)
                 .tabItem { Label("Zurück", systemImage: "arrow.uturn.backward") }
 
-            SettingsView(store: store)
+            SettingsView(store: store, purchases: purchases)
                 .tabItem { Label("Einstellungen", systemImage: "gearshape") }
         }
     }

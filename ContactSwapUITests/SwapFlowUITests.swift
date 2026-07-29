@@ -53,6 +53,24 @@ final class SwapFlowUITests: XCTestCase {
                        "Abbrechen muss das Feld wieder schließen")
     }
 
+    @MainActor
+    func testKostenloseFassungWirdAusgewiesen() throws {
+        let app = launchApp()
+
+        XCTAssertTrue(app.staticTexts["Kostenlose Fassung"].exists,
+                      "Auf der Swap-Seite fehlt der Hinweis auf die kostenlose Fassung")
+
+        app.tabBars.buttons["Einstellungen"].tap()
+
+        XCTAssertTrue(app.staticTexts["Swaps übrig"].waitForExistence(timeout: 2),
+                      "In den Einstellungen fehlt der Zähler")
+        XCTAssertTrue(app.buttons["buy-lifetime"].exists, "Kauf-Knopf fehlt")
+        XCTAssertTrue(app.buttons["restore-purchase"].exists, "Wiederherstellen fehlt")
+        XCTAssertTrue(app.buttons["bulk-licenses"].exists, "Hinweis auf Massenlizenzen fehlt")
+
+        attachScreenshot(app, name: "Einstellungen mit Kaufbereich")
+    }
+
     // MARK: - Hilfen
 
     @MainActor

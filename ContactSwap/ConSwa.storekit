@@ -1,0 +1,30 @@
+{
+  "identifier" : "A1B2C3D4",
+  "nonRenewingSubscriptions" : [],
+  "products" : [
+    {
+      "displayPrice" : "3.99",
+      "familyShareable" : false,
+      "internalID" : "3F9A1C22",
+      "localizations" : [
+        {
+          "description" : "Schaltet unbegrenzte Swaps dauerhaft frei. Einmalig, kein Abonnement.",
+          "displayName" : "ConSwa dauerhaft",
+          "locale" : "de_DE"
+        }
+      ],
+      "productID" : "enricofrank.ContactSwap.lifetime",
+      "referenceName" : "ConSwa Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_askToBuyEnabled" : false,
+    "_storeKitErrors" : []
+  },
+  "subscriptionGroups" : [],
+  "version" : {
+    "major" : 4,
+    "minor" : 0
+  }
+}
