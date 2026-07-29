@@ -388,15 +388,10 @@
 		9909C08E3018CFDD00C02B53 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = (
-					IconCalculator,
-					IconClock,
-					IconCompass,
-					IconNotes,
-				);
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "IconCalculator IconClock IconCompass IconNotes";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RWL4TPMC4V;
@@ -406,7 +401,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSContactsUsageDescription = "ContactSwap sichert deine Kontakte lokal, damit du sie fuer Recherchen voruebergehend austauschen und danach vollstaendig wiederherstellen kannst.";
+				INFOPLIST_KEY_CFBundleDisplayName = ConSwa;
+				INFOPLIST_KEY_NSContactsUsageDescription = "Sichert deine Kontakte lokal auf diesem Gerät, damit sie sich jederzeit vollständig wiederherstellen lassen.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -445,15 +441,10 @@
 		9909C08F3018CFDD00C02B53 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = (
-					IconCalculator,
-					IconClock,
-					IconCompass,
-					IconNotes,
-				);
+				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = "IconCalculator IconClock IconCompass IconNotes";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = RWL4TPMC4V;
@@ -463,7 +454,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
-				INFOPLIST_KEY_NSContactsUsageDescription = "ContactSwap sichert deine Kontakte lokal, damit du sie fuer Recherchen voruebergehend austauschen und danach vollstaendig wiederherstellen kannst.";
+				INFOPLIST_KEY_CFBundleDisplayName = ConSwa;
+				INFOPLIST_KEY_NSContactsUsageDescription = "Sichert deine Kontakte lokal auf diesem Gerät, damit sie sich jederzeit vollständig wiederherstellen lassen.";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

@@ -155,7 +155,7 @@ final class AppStore: ObservableObject {
             }
             alert = .info(
                 "Export abgelegt",
-                "In der Dateien-App unter „Auf meinem iPhone → ContactSwap → \(url.lastPathComponent)“."
+                "In der Dateien-App unter „Auf meinem iPhone → ConSwa → \(url.lastPathComponent)“."
             )
         } catch {
             alert = .error("Export fehlgeschlagen", error)

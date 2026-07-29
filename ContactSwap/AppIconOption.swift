@@ -16,7 +16,7 @@ struct AppIconOption: Identifiable, Sendable {
     var id: String { name ?? "default" }
 
     static let all: [AppIconOption] = [
-        AppIconOption(name: nil, title: "ContactSwap", previewAsset: "AppIconPreview"),
+        AppIconOption(name: nil, title: "Standard", previewAsset: "AppIconPreview"),
         AppIconOption(name: "IconCalculator", title: "Rechner", previewAsset: "IconCalculatorPreview"),
         AppIconOption(name: "IconNotes", title: "Notizen", previewAsset: "IconNotesPreview"),
         AppIconOption(name: "IconCompass", title: "Kompass", previewAsset: "IconCompassPreview"),

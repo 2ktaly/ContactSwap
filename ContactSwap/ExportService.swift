@@ -28,7 +28,7 @@ class ExportService {
     @discardableResult
     func exportBackup(_ backup: BackupFile) throws -> URL {
         let stamp = Self.filenameFormatter.string(from: backup.metadata.timestamp)
-        let folderName = "ContactSwap \(sanitized(backup.metadata.name)) \(stamp)"
+        let folderName = "\(Self.exportPrefix)\(sanitized(backup.metadata.name)) \(stamp)"
         let destination = documentsDirectory.appendingPathComponent(folderName, isDirectory: true)
 
         if fileManager.fileExists(atPath: destination.path) {
@@ -52,8 +52,12 @@ class ExportService {
         return destination
     }
 
+    /// Steht vor jedem Exportordner, damit `listExports` die eigenen Ablagen
+    /// von allem anderen im Dokumente-Ordner unterscheiden kann.
+    private static let exportPrefix = "ConSwa "
+
     private static let warningText = """
-    ContactSwap – exportiertes Backup
+    ConSwa – exportiertes Backup
 
     Dieser Ordner ist UNVERSCHLÜSSELT und enthält vollständige Kontaktdaten
     inklusive Namen, Nummern, Adressen, Geburtstagen und Fotos.
@@ -70,7 +74,7 @@ class ExportService {
             includingPropertiesForKeys: nil,
             options: [.skipsHiddenFiles]
         )
-        return entries.filter { $0.lastPathComponent.hasPrefix("ContactSwap ") }
+        return entries.filter { $0.lastPathComponent.hasPrefix(Self.exportPrefix) }
     }
 
     func deleteExport(at url: URL) throws {

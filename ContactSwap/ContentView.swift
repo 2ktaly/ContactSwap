@@ -81,7 +81,7 @@ struct PermissionGateView: View {
             Text("Zugriff auf Kontakte nötig")
                 .font(.title2.bold())
 
-            Text("ContactSwap sichert dein Adressbuch, bevor etwas entfernt wird. Ohne Kontakt-Freigabe kann die App weder sichern noch wiederherstellen.")
+            Text("Die App sichert dein Adressbuch, bevor etwas entfernt wird. Ohne Kontakt-Freigabe kann sie weder sichern noch wiederherstellen.")
                 .font(.callout)
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
@@ -99,7 +99,7 @@ struct PermissionGateView: View {
                 }
                 .buttonStyle(.borderedProminent)
 
-                Text("Datenschutz & Sicherheit → Kontakte → ContactSwap")
+                Text("Datenschutz & Sicherheit → Kontakte → ConSwa")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
