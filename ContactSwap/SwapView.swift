@@ -33,28 +33,17 @@ struct SwapView: View {
                 }
 
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Leeren") { showConfirmation = true }
-                        .buttonStyle(.borderedProminent)
-                        .tint(.blue)
-                        .disabled(store.deviceContacts.isEmpty || store.busyMessage != nil)
+                    Button("Leeren") {
+                        withAnimation { showConfirmation.toggle() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.blue)
+                    .disabled(store.deviceContacts.isEmpty || store.busyMessage != nil)
                 }
             }
             .searchable(text: $searchText, prompt: "Kontakt suchen")
             .sheet(isPresented: $showingInfo) {
                 InfoView()
-            }
-            .confirmationDialog(
-                "Adressbuch leeren?",
-                isPresented: $showConfirmation,
-                titleVisibility: .visible
-            ) {
-                Button("Sichern und leeren", role: .destructive) {
-                    let kept = keptIDs
-                    Task { await store.swap(keeping: kept) }
-                }
-                Button("Abbrechen", role: .cancel) { }
-            } message: {
-                Text(confirmationMessage)
             }
             .refreshable { await store.reloadDeviceContacts() }
         }
@@ -70,29 +59,79 @@ struct SwapView: View {
                 }
             }
 
-            Section("Behalten (\(keptIDs.count) von \(store.deviceContacts.count))") {
+            if showConfirmation {
+                confirmationSection
+            }
+
+            if !keptContacts.isEmpty {
+                Section {
+                    ForEach(keptContacts) { contact in
+                        Button {
+                            toggle(contact.id)
+                        } label: {
+                            ContactRow(contact: contact, isKept: true)
+                        }
+                    }
+                } header: {
+                    Text("Behalten (\(keptContacts.count))")
+                } footer: {
+                    Text("Diese Kontakte bleiben im Adressbuch. Zum Entfernen aus der Auswahl antippen.")
+                }
+            }
+
+            Section("Alle Kontakte (\(store.deviceContacts.count))") {
                 ForEach(filteredContacts) { contact in
                     Button {
                         toggle(contact.id)
                     } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: keptIDs.contains(contact.id) ? "checkmark.circle.fill" : "circle")
-                                .foregroundStyle(keptIDs.contains(contact.id) ? Color.accentColor : Color.secondary)
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text(contact.displayName)
-                                    .foregroundStyle(.primary)
-                                if let phone = contact.phones.first?.value {
-                                    Text(phone)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
+                        ContactRow(contact: contact, isKept: keptIDs.contains(contact.id))
                     }
                 }
             }
         }
+    }
+
+    /// Bestätigung als Feld in der Liste statt als Pop-up: Der Nutzer sieht
+    /// dabei weiter, welche Kontakte er behält.
+    private var confirmationSection: some View {
+        Section {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(confirmationMessage)
+                    .font(.callout)
+
+                if !store.syncedSources.isEmpty {
+                    Label(syncWarning, systemImage: "exclamationmark.triangle.fill")
+                        .font(.footnote)
+                        .foregroundStyle(.orange)
+                }
+
+                HStack(spacing: 12) {
+                    Button("Sichern und leeren", role: .destructive) {
+                        let kept = keptIDs
+                        withAnimation { showConfirmation = false }
+                        Task { await store.swap(keeping: kept) }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(.red)
+
+                    Button("Abbrechen") {
+                        withAnimation { showConfirmation = false }
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            .padding(.vertical, 6)
+        } header: {
+            Text("Adressbuch leeren?")
+                .foregroundStyle(.red)
+        }
+        .listRowBackground(Color.red.opacity(0.07))
+    }
+
+    /// Die ausgewählten Kontakte – bewusst ungefiltert, damit die Suche in der
+    /// unteren Liste die eigene Auswahl nicht aus dem Blick nimmt.
+    private var keptContacts: [Contact] {
+        store.deviceContacts.filter { keptIDs.contains($0.id) }
     }
 
     private var filteredContacts: [Contact] {
@@ -105,22 +144,18 @@ struct SwapView: View {
 
     private var confirmationMessage: String {
         let remove = store.deviceContacts.count - keptIDs.count
-        var message: String
 
         if keptIDs.isEmpty {
-            message = "Alle \(store.deviceContacts.count) Kontakte werden entfernt. Ein Backup wird vorher automatisch angelegt – nichts geht verloren."
-        } else {
-            message = "\(remove) Kontakte werden entfernt, \(keptIDs.count) bleiben. Ein Backup wird vorher automatisch angelegt."
+            return "Alle \(store.deviceContacts.count) Kontakte werden entfernt. Ein Backup wird vorher automatisch angelegt – nichts geht verloren."
         }
+        return "\(remove) Kontakte werden entfernt, \(keptIDs.count) bleiben. Ein Backup wird vorher automatisch angelegt."
+    }
 
-        // Ohne diesen Zusatz wirkt der Swap wie eine rein lokale Aktion –
-        // bei aktiven Server-Quellen ist er das ausdrücklich nicht.
-        if !store.syncedSources.isEmpty {
-            let names = store.syncedSources.map(\.name).joined(separator: ", ")
-            message += "\n\nAchtung: \(names) hängt an einem Server. Die Löschung wirkt dort und auf allen verbundenen Geräten."
-        }
-
-        return message
+    /// Ohne diesen Zusatz wirkt der Swap wie eine rein lokale Aktion –
+    /// bei aktiven Server-Quellen ist er das ausdrücklich nicht.
+    private var syncWarning: String {
+        let names = store.syncedSources.map(\.name).joined(separator: ", ")
+        return "\(names) hängt an einem Server. Die Löschung wirkt dort und auf allen verbundenen Geräten."
     }
 
     private func toggle(_ id: String) {
@@ -128,6 +163,28 @@ struct SwapView: View {
             keptIDs.remove(id)
         } else {
             keptIDs.insert(id)
+        }
+    }
+}
+
+struct ContactRow: View {
+    let contact: Contact
+    let isKept: Bool
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: isKept ? "checkmark.circle.fill" : "circle")
+                .foregroundStyle(isKept ? Color.accentColor : Color.secondary)
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(contact.displayName)
+                    .foregroundStyle(.primary)
+                if let phone = contact.phones.first?.value {
+                    Text(phone)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
         }
     }
 }
