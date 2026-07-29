@@ -54,11 +54,11 @@ final class SwapFlowUITests: XCTestCase {
     }
 
     @MainActor
-    func testKostenloseFassungWirdAusgewiesen() throws {
+    func testKostenloseFassungStehtNurInDenEinstellungen() throws {
         let app = launchApp()
 
-        XCTAssertTrue(app.staticTexts["Kostenlose Fassung"].exists,
-                      "Auf der Swap-Seite fehlt der Hinweis auf die kostenlose Fassung")
+        XCTAssertFalse(app.staticTexts["Kostenlose Fassung"].exists,
+                       "Die Swap-Seite soll frei von Hinweisen zur Fassung bleiben")
 
         app.tabBars.buttons["Einstellungen"].tap()
 
@@ -71,11 +71,34 @@ final class SwapFlowUITests: XCTestCase {
         attachScreenshot(app, name: "Einstellungen mit Kaufbereich")
     }
 
+    @MainActor
+    func testEinfuehrungKommtVorDerBerechtigungsfrage() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-hasSeenWelcome", "NO"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Willkommen"].waitForExistence(timeout: 5),
+                      "Der Einführungsbildschirm fehlt")
+        XCTAssertTrue(app.staticTexts["Kontaktzugriff wird benötigt"].exists)
+        XCTAssertTrue(app.staticTexts["Ausschließlich auf diesem Gerät"].exists)
+
+        // Der Systemdialog darf erst nach dem Weiter-Knopf erscheinen.
+        XCTAssertFalse(app.staticTexts["Ausschließlich lokal"].exists,
+                       "Die Swap-Seite darf vor dem Weiter-Knopf nicht sichtbar sein")
+
+        attachScreenshot(app, name: "Einführung")
+
+        XCTAssertTrue(app.buttons["Weiter"].exists, "Weiter-Knopf fehlt")
+    }
+
     // MARK: - Hilfen
 
     @MainActor
     private func launchApp() -> XCUIApplication {
         let app = XCUIApplication()
+        // Überspringt den Einführungsbildschirm, der sonst jedem Test im Weg
+        // stünde. UserDefaults lassen sich so für die Testsitzung vorbelegen.
+        app.launchArguments = ["-hasSeenWelcome", "YES"]
         app.launch()
         XCTAssertTrue(app.staticTexts["Ausschließlich lokal"].waitForExistence(timeout: 5),
                       "Swap-Seite wurde nicht geladen – fehlt der Kontaktzugriff?")

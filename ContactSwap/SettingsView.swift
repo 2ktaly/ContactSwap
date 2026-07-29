@@ -168,17 +168,33 @@ struct SettingsView: View {
             }
 
             Button {
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
+                openAppSettings()
             } label: {
-                Label("iOS-Einstellungen öffnen", systemImage: "gear")
+                HStack {
+                    Label("Kontaktfreigabe in den Systemeinstellungen",
+                          systemImage: store.hasAccess ? "gear" : "exclamationmark.triangle.fill")
+                        .foregroundStyle(store.hasAccess ? Color.accentColor : .orange)
+                    Spacer()
+                    Text(permissionLabel)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             }
+            .accessibilityIdentifier("open-app-settings")
         } header: {
             Text("Kontakte")
         } footer: {
-            Text("Ist der Google-Kontakte-Sync aktiv, spielt Google gelöschte Kontakte binnen Minuten zurück – die Recherche wird dadurch unbrauchbar.")
+            Text(store.hasAccess
+                 ? "Führt direkt zu dieser App in den Systemeinstellungen – etwa wenn die Kontaktfreigabe versehentlich entzogen wurde."
+                 : "Ohne Kontaktfreigabe kann die App weder sichern noch wiederherstellen. Der Knopf führt direkt zur richtigen Stelle in den Systemeinstellungen.")
         }
+    }
+
+    private func openAppSettings() {
+        // Führt in den Systemeinstellungen direkt zu dieser App, nicht nur
+        // zur Startseite – dort steht auch der Schalter für die Kontakte.
+        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+        UIApplication.shared.open(url)
     }
 
     // MARK: - Status
@@ -187,7 +203,6 @@ struct SettingsView: View {
         Section {
             LabeledContent("Kontakte im Adressbuch", value: "\(store.deviceContacts.count)")
             LabeledContent("Backups", value: "\(store.backups.count)")
-            LabeledContent("Kontaktfreigabe", value: permissionLabel)
             LabeledContent("Speicherung", value: "lokal, verschlüsselt")
             LabeledContent("Version", value: Bundle.main.shortVersion)
         } header: {
@@ -199,23 +214,15 @@ struct SettingsView: View {
 
     // MARK: - Quelltext
 
-    @ViewBuilder
     private var sourceCodeSection: some View {
         Section {
-            if purchases.isPurchased {
-                Link(destination: Self.repositoryURL) {
-                    Label("Quelltext auf GitHub", systemImage: "curlybraces")
-                }
-            } else {
-                Label("Quelltext für Freigeschaltete", systemImage: "curlybraces")
-                    .foregroundStyle(.secondary)
+            Link(destination: Self.repositoryURL) {
+                Label("Quelltext auf GitHub", systemImage: "curlybraces")
             }
         } header: {
             Text("Nachprüfbarkeit")
         } footer: {
-            Text(purchases.isPurchased
-                 ? "Der vollständige Quelltext ist einsehbar – so lässt sich prüfen, dass die App keine Daten verschickt. Einsehbar heißt nicht frei verwendbar: Vervielfältigung und Weitergabe sind laut Lizenz untersagt."
-                 : "Nach der Freischaltung steht der vollständige Quelltext zur Einsicht bereit. Damit lässt sich nachprüfen, dass die App keine Daten verschickt.")
+            Text("Der vollständige Quelltext ist für jeden einsehbar – auch ohne Kauf, denn Vertrauen muss man vor der Nutzung fassen können. Einsehbar heißt nicht frei verwendbar: Vervielfältigung und Weitergabe sind laut Lizenz untersagt.")
         }
     }
 

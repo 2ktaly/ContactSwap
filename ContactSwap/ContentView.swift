@@ -6,9 +6,18 @@ struct ContentView: View {
     @StateObject private var purchases = PurchaseStore()
     @Environment(\.scenePhase) private var scenePhase
 
+    /// Der Einführungstext läuft genau einmal – danach ist die Freigabe
+    /// entweder erteilt oder über die Systemeinstellungen zu holen.
+    @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
+
     var body: some View {
         Group {
-            if store.hasAccess {
+            if !hasSeenWelcome {
+                WelcomeView {
+                    hasSeenWelcome = true
+                    Task { await store.requestPermissionIfNeeded() }
+                }
+            } else if store.hasAccess {
                 mainTabs
             } else {
                 PermissionGateView(store: store)
@@ -23,6 +32,9 @@ struct ContentView: View {
             )
         }
         .task {
+            // Beim ersten Start fragt erst der Einführungsbildschirm; danach
+            // nur noch den Stand einlesen, ohne einen neuen Dialog auszulösen.
+            guard hasSeenWelcome else { return }
             await store.requestPermissionIfNeeded()
         }
         .task {

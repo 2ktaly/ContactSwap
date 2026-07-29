@@ -175,10 +175,7 @@ final class AppStore: ObservableObject {
     /// Stelle liegt und nicht doppelt geführt wird.
     func swap(keeping keptIDs: Set<String>, isUnlocked: Bool) async {
         guard isUnlocked || remainingFreeSwaps > 0 else {
-            alert = .info(
-                "Swap bereits genutzt",
-                "In der kostenlosen Fassung ist ein Swap enthalten. Unter „Einstellungen“ lässt sich die App dauerhaft freischalten – Wiederherstellen und Export bleiben ohnehin unbegrenzt möglich."
-            )
+            alert = .swapUsedUp
             return
         }
 
@@ -270,4 +267,11 @@ struct AppAlert: Identifiable {
     static func error(_ title: String, _ error: Error) -> AppAlert {
         AppAlert(title: title, message: error.localizedDescription)
     }
+
+    /// Steht an zwei Stellen: beim Antippen des gesperrten Knopfes und als
+    /// Notbremse im Store, falls doch ein Swap durchrutscht.
+    static let swapUsedUp = AppAlert(
+        title: String(localized: "Swap bereits genutzt"),
+        message: String(localized: "In der kostenlosen Fassung ist ein Swap enthalten. Unter „Einstellungen“ lässt sich die App dauerhaft freischalten – Wiederherstellen und Export bleiben ohnehin unbegrenzt möglich.")
+    )
 }
