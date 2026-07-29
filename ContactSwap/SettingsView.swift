@@ -65,7 +65,7 @@ struct SettingsView: View {
             } header: {
                 Text("Fassung")
             } footer: {
-                Text("Einmalig, kein Abonnement. Wiederherstellen, Export und Prüfen bleiben auch ohne Kauf unbegrenzt – die Begrenzung betrifft nur das Leeren des Adressbuchs.")
+                Text("Einmalig, kein Abonnement. Wiederherstellen, Export und Prüfen bleiben auch ohne Kauf unbegrenzt. Begrenzt ist nur das Leeren des Adressbuchs.")
             }
 
             Section {
@@ -107,7 +107,7 @@ struct SettingsView: View {
         } footer: {
             Text(store.syncedSources.isEmpty
                  ? "Alle Kontakte liegen lokal auf diesem iPhone. Ein Swap wirkt nirgendwo sonst."
-                 : "Orange markierte Quellen hängen an einem Server. Löschungen wirken dort und auf allen verbundenen Geräten – manche Dienste spielen Kontakte auch wieder zurück.")
+                 : "Orange markierte Quellen hängen an einem Server. Löschungen wirken dort und auf allen verbundenen Geräten. Manche Dienste spielen Kontakte auch wieder zurück.")
         }
     }
 
@@ -153,7 +153,7 @@ struct SettingsView: View {
         } header: {
             Text("Erscheinungsbild")
         } footer: {
-            Text("Das Icon lässt sich hier wechseln. Den Namen unter dem Icon kann iOS nicht zur Laufzeit ändern – dafür gibt es den Weg über einen Kurzbefehl.")
+            Text("Das Icon lässt sich hier wechseln. Den Namen darunter kann iOS nicht zur Laufzeit ändern. Dafür gibt es den Weg über einen Kurzbefehl.")
         }
     }
 
@@ -185,7 +185,7 @@ struct SettingsView: View {
             Text("Kontakte")
         } footer: {
             Text(store.hasAccess
-                 ? "Führt direkt zu dieser App in den Systemeinstellungen – etwa wenn die Kontaktfreigabe versehentlich entzogen wurde."
+                 ? "Führt direkt zu dieser App in den Systemeinstellungen, etwa wenn die Kontaktfreigabe versehentlich entzogen wurde."
                  : "Ohne Kontaktfreigabe kann die App weder sichern noch wiederherstellen. Der Knopf führt direkt zur richtigen Stelle in den Systemeinstellungen.")
         }
     }
@@ -208,7 +208,7 @@ struct SettingsView: View {
         } header: {
             Text("Status")
         } footer: {
-            Text("Backups liegen AES-verschlüsselt auf dem Gerät. Der Schlüssel steckt im Schlüsselbund dieses iPhones und verlässt es nicht – auch nicht über ein iCloud-Backup. Ein Passwort brauchst du nicht, der Gerätecode schützt ihn.")
+            Text("Backups liegen AES-verschlüsselt auf dem Gerät. Der Schlüssel steckt im Schlüsselbund dieses iPhones und verlässt es nicht, auch nicht über ein iCloud-Backup. Ein Passwort brauchst du nicht, der Gerätecode schützt ihn.")
         }
     }
 
@@ -222,7 +222,7 @@ struct SettingsView: View {
         } header: {
             Text("Nachprüfbarkeit")
         } footer: {
-            Text("Der vollständige Quelltext ist für jeden einsehbar – auch ohne Kauf, denn Vertrauen muss man vor der Nutzung fassen können. Einsehbar heißt nicht frei verwendbar: Vervielfältigung und Weitergabe sind laut Lizenz untersagt.")
+            Text("Der vollständige Quelltext ist für jeden einsehbar, auch ohne Kauf. Einsehbar heißt nicht frei verwendbar: Vervielfältigung und Weitergabe sind laut Lizenz untersagt.")
         }
     }
 
@@ -241,7 +241,7 @@ struct SettingsView: View {
             case .cancelled:
                 break
             case .failed(let reason):
-                store.alert = .info("Kauf nicht abgeschlossen", reason)
+                store.alert = .info("Kauf nicht abgeschlossen", "\(reason)")
             }
         }
     }

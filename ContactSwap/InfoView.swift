@@ -10,12 +10,12 @@ struct InfoView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("Wähle die Kontakte aus, die im Adressbuch bleiben sollen. Alle anderen werden entfernt – vorher legt die App automatisch ein vollständiges Backup an.")
+                    Text("Wähle die Kontakte aus, die im Adressbuch bleiben sollen. Alle anderen werden entfernt. Vorher legt die App ein vollständiges Backup an.")
                         .font(.callout)
                 }
 
                 Section("Ablauf") {
-                    StepRow(number: 1, text: "Alle Kontakt-Syncs abschalten – iCloud zuerst, es ist fast immer aktiv.")
+                    StepRow(number: 1, text: "Alle Kontakt-Syncs abschalten. Zuerst iCloud, das ist fast immer aktiv.")
                     StepRow(number: 2, text: "Unter „Swap“ die Kontakte auswählen, die bleiben sollen, und auf „Leeren“ tippen.")
                     StepRow(number: 3, text: "In der Ziel-App die Kontaktfreigabe erteilen und die Vorschläge auswerten.")
                     StepRow(number: 4, text: "Unter „Zurück“ das Backup wieder einspielen, dann die Syncs wieder einschalten.")
@@ -30,20 +30,20 @@ struct InfoView: View {
                 } header: {
                     Text("Vor der Recherche")
                 } footer: {
-                    Text("Zwei Gefahren, die sich unterscheiden: iCloud trägt die Löschung auf alle Apple-Geräte weiter. Google, Exchange und CardDAV-Konten spielen Kontakte dagegen vom Server zurück und machen die Recherche unbrauchbar. Welche Quellen hier laufen, steht unter „Einstellungen“.")
+                    Text("iCloud trägt die Löschung auf alle Apple-Geräte weiter. Google, Exchange und CardDAV-Konten spielen Kontakte vom Server zurück und machen die Recherche unbrauchbar. Welche Quellen hier laufen, steht unter „Einstellungen“.")
                 }
 
                 Section {
-                    Text("Kontakte werden nie endgültig gelöscht: Vor jedem Leeren legt die App automatisch ein vollständiges Backup an. Unter „Zurück“ lässt es sich jederzeit einspielen, prüfen oder in die Dateien-App exportieren.")
+                    Text("Kontakte werden nie endgültig gelöscht. Vor jedem Leeren legt die App ein vollständiges Backup an. Unter „Zurück“ kannst du es einspielen, prüfen oder in die Dateien-App exportieren.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
 
                 Section("Wo die Daten liegen") {
-                    Text("Backups liegen AES-verschlüsselt im Speicher der App. Der Schlüssel steckt im Schlüsselbund dieses iPhones, ist an dieses Gerät gebunden und wandert in kein iCloud-Backup. Eine kopierte Backup-Datei ist auf einem anderen Gerät wertlos.")
+                    Text("Backups liegen AES-verschlüsselt im Speicher der App. Der Schlüssel steckt im Schlüsselbund dieses iPhones und wandert in kein iCloud-Backup. Eine kopierte Backup-Datei ist auf einem anderen Gerät wertlos.")
                         .font(.callout)
 
-                    Text("Der Export in die Dateien-App ist bewusst unverschlüsselt – sonst wäre er ohne dieses iPhone nicht mehr lesbar und als Sicherung wertlos. Exportierte Ordner also bewusst ablegen und wieder löschen.")
+                    Text("Der Export in die Dateien-App ist unverschlüsselt. Verschlüsselt wäre er ohne dieses iPhone nicht mehr lesbar und als Sicherung wertlos. Lege exportierte Ordner sorgfältig ab und lösche sie danach.")
                         .font(.callout)
                 }
             }
@@ -63,11 +63,11 @@ struct InfoView: View {
 
 struct StepRow: View {
     let number: Int
-    let text: String
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Text("\(number)")
+            Text(verbatim: "\(number)")
                 .font(.caption.bold())
                 .foregroundStyle(.white)
                 .frame(width: 22, height: 22)
@@ -91,7 +91,7 @@ struct DisguiseGuideView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("Den Namen unter dem Icon kann keine App auf dem iPhone selbst ändern – iOS sieht dafür keinen Weg vor. Über einen Kurzbefehl lässt sich aber eine Kachel anlegen, die Namen und Bild frei wählt und beim Antippen diese App öffnet.")
+                    Text("Keine App auf dem iPhone kann den Namen unter ihrem eigenen Icon ändern. iOS sieht dafür keinen Weg vor. Ein Kurzbefehl kann aber eine Kachel anlegen, die Namen und Bild frei wählt und diese App öffnet.")
                         .font(.callout)
                 }
 
@@ -108,7 +108,7 @@ struct DisguiseGuideView: View {
                 }
 
                 Section {
-                    Text("Was bleibt: In den iOS-Einstellungen, in der App-Mediathek und in der Suche steht weiterhin der echte Name. Wer gezielt sucht, findet die App – die Kachel schützt gegen den flüchtigen Blick, nicht gegen eine Durchsuchung.")
+                    Text("In den iOS-Einstellungen, in der App-Mediathek und in der Suche steht weiterhin der echte Name. Wer gezielt danach sucht, findet die App. Gegen eine Durchsuchung hilft die Kachel nicht.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }

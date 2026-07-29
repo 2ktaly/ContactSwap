@@ -89,8 +89,8 @@ enum BackupVerifier {
             let left = a ?? "", right = b ?? ""
             guard left != right else { return }
             result.append(FieldMismatch(contactName: name, field: field,
-                                        inAddressBook: left.isEmpty ? "–" : left,
-                                        inBackup: right.isEmpty ? "–" : right))
+                                        inAddressBook: left.isEmpty ? "leer" : left,
+                                        inBackup: right.isEmpty ? "leer" : right))
         }
 
         check("Titel", live.namePrefix, stored.namePrefix)
@@ -147,8 +147,8 @@ enum BackupVerifier {
         result.append(FieldMismatch(
             contactName: name,
             field: field,
-            inAddressBook: live.isEmpty ? "–" : live.sorted().joined(separator: " | "),
-            inBackup: stored.isEmpty ? "–" : stored.sorted().joined(separator: " | ")
+            inAddressBook: live.isEmpty ? "leer" : live.sorted().joined(separator: " | "),
+            inBackup: stored.isEmpty ? "leer" : stored.sorted().joined(separator: " | ")
         ))
     }
 
@@ -177,7 +177,7 @@ enum BackupVerifier {
     }
 
     private static func describe(_ components: DateComponents?) -> String {
-        guard let c = components else { return "–" }
+        guard let c = components else { return "leer" }
         let day = c.day.map { String(format: "%02d", $0) } ?? "??"
         let month = c.month.map { String(format: "%02d", $0) } ?? "??"
         let year = c.year.map(String.init) ?? "ohne Jahr"

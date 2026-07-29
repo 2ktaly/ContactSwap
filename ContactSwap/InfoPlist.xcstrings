@@ -1,0 +1,24 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSContactsUsageDescription" : {
+      "comment" : "Steht im Systemdialog beim ersten Kontaktzugriff.",
+      "extractionState" : "manual",
+      "localizations" : {
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sichert deine Kontakte lokal auf diesem Gerät, damit sie sich jederzeit vollständig wiederherstellen lassen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saves your contacts locally on this device so they can be restored in full at any time."
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

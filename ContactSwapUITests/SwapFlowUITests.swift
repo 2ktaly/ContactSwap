@@ -74,7 +74,7 @@ final class SwapFlowUITests: XCTestCase {
     @MainActor
     func testEinfuehrungKommtVorDerBerechtigungsfrage() throws {
         let app = XCUIApplication()
-        app.launchArguments = ["-hasSeenWelcome", "NO"]
+        app.launchArguments = ["-hasSeenWelcome", "NO", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
 
         XCTAssertTrue(app.staticTexts["Willkommen"].waitForExistence(timeout: 5),
@@ -91,14 +91,33 @@ final class SwapFlowUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Weiter"].exists, "Weiter-Knopf fehlt")
     }
 
+    /// Prüft, dass ein nicht-deutsches System die App auf Englisch bekommt.
+    /// Französisch steht hier für „irgendeine Sprache, die es nicht gibt“: Es
+    /// muss auf Englisch zurückfallen, nicht auf Deutsch.
+    @MainActor
+    func testFremdspracheBekommtEnglisch() throws {
+        let app = XCUIApplication()
+        app.launchArguments = ["-hasSeenWelcome", "NO", "-AppleLanguages", "(fr)", "-AppleLocale", "fr_FR"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["Welcome"].waitForExistence(timeout: 5),
+                      "Ein französisches System muss auf Englisch fallen, nicht auf Deutsch")
+        XCTAssertFalse(app.staticTexts["Willkommen"].exists)
+        XCTAssertTrue(app.staticTexts["Contact access required"].exists)
+        XCTAssertTrue(app.buttons["Continue"].exists)
+
+        attachScreenshot(app, name: "Englische Fassung")
+    }
+
     // MARK: - Hilfen
 
     @MainActor
     private func launchApp() -> XCUIApplication {
         let app = XCUIApplication()
         // Überspringt den Einführungsbildschirm, der sonst jedem Test im Weg
-        // stünde. UserDefaults lassen sich so für die Testsitzung vorbelegen.
-        app.launchArguments = ["-hasSeenWelcome", "YES"]
+        // stünde, und legt die Sprache fest: Diese Tests prüfen die deutschen
+        // Texte, unabhängig davon, wie der Simulator eingestellt ist.
+        app.launchArguments = ["-hasSeenWelcome", "YES", "-AppleLanguages", "(de)", "-AppleLocale", "de_DE"]
         app.launch()
         XCTAssertTrue(app.staticTexts["Ausschließlich lokal"].waitForExistence(timeout: 5),
                       "Swap-Seite wurde nicht geladen – fehlt der Kontaktzugriff?")

@@ -99,7 +99,7 @@ final class AppStore: ObservableObject {
             // Bei Abweichungen den Detailbericht zeigen, sonst genügt die Meldung.
             // Beides gleichzeitig würde SwiftUI verschlucken.
             if report.isComplete {
-                alert = .info("Backup geprüft und vollständig", report.summary)
+                alert = .info("Backup geprüft und vollständig", "\(report.summary)")
             } else {
                 verification = report
             }
@@ -207,11 +207,11 @@ final class AppStore: ObservableObject {
             await reloadAll()
             alert = .info(
                 "Adressbuch geleert",
-                "\(deleted) Kontakte entfernt, \(keptIDs.count) behalten.\n\nGesichert als „\(backup.metadata.name)“ – über „Wiederherstellen“ kommt alles zurück."
+                "\(deleted) Kontakte entfernt, \(keptIDs.count) behalten.\n\nGesichert als „\(backup.metadata.name)“. Über „Zurück“ kommt alles wieder."
             )
         } catch {
             busyMessage = nil
-            alert = .error("Swap abgebrochen – es wurde nichts gelöscht", error)
+            alert = .error("Swap abgebrochen. Es wurde nichts gelöscht", error)
         }
     }
 
@@ -255,23 +255,27 @@ final class AppStore: ObservableObject {
     }
 }
 
+/// Titel und Text sind `LocalizedStringResource`, nicht `String`: Ein String,
+/// der herumgereicht wird, kommt nie durch die Übersetzung, weil SwiftUI nur
+/// Literale nachschlägt.
 struct AppAlert: Identifiable {
     let id = UUID()
-    let title: String
-    let message: String
+    let title: LocalizedStringResource
+    let message: LocalizedStringResource
 
-    static func info(_ title: String, _ message: String) -> AppAlert {
+    static func info(_ title: LocalizedStringResource, _ message: LocalizedStringResource) -> AppAlert {
         AppAlert(title: title, message: message)
     }
 
-    static func error(_ title: String, _ error: Error) -> AppAlert {
-        AppAlert(title: title, message: error.localizedDescription)
+    /// Die Fehlerbeschreibung kommt vom System und ist bereits übersetzt.
+    static func error(_ title: LocalizedStringResource, _ error: Error) -> AppAlert {
+        AppAlert(title: title, message: "\(error.localizedDescription)")
     }
 
     /// Steht an zwei Stellen: beim Antippen des gesperrten Knopfes und als
     /// Notbremse im Store, falls doch ein Swap durchrutscht.
     static let swapUsedUp = AppAlert(
-        title: String(localized: "Swap bereits genutzt"),
-        message: String(localized: "In der kostenlosen Fassung ist ein Swap enthalten. Unter „Einstellungen“ lässt sich die App dauerhaft freischalten – Wiederherstellen und Export bleiben ohnehin unbegrenzt möglich.")
+        title: "Swap bereits genutzt",
+        message: "Die kostenlose Fassung enthält einen Swap. Unter „Einstellungen“ schaltest du die App dauerhaft frei. Wiederherstellen und Export bleiben unbegrenzt."
     )
 }

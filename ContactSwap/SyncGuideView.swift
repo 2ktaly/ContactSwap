@@ -5,8 +5,8 @@ struct SyncProvider: Identifiable {
     let id = UUID()
     let name: String
     let risk: Risk
-    let summary: String
-    let steps: [String]
+    let summary: LocalizedStringKey
+    let steps: [LocalizedStringKey]
 
     enum Risk {
         case returnsContacts   // spielt gelöschte Kontakte zurück
@@ -29,7 +29,7 @@ struct SyncProvider: Identifiable {
             }
         }
 
-        var label: String {
+        var label: LocalizedStringKey {
             switch self {
             case .returnsContacts: return "spielt Kontakte zurück"
             case .spreadsDeletion: return "löscht überall mit"
@@ -51,7 +51,7 @@ struct SyncGuideView: View {
         NavigationStack {
             List {
                 Section {
-                    Text("Alles, was hier aktiv ist, überlebt einen Swap oder macht ihn rückgängig. Welche Quellen auf diesem iPhone tatsächlich laufen, steht unter „Einstellungen“ in der App.")
+                    Text("Alles, was hier aktiv ist, überlebt einen Swap oder macht ihn rückgängig. Welche Quellen auf diesem iPhone laufen, steht unter „Einstellungen“ in der App.")
                         .font(.callout)
                 }
 
@@ -117,9 +117,9 @@ struct SyncGuideView: View {
             }
             .padding(.vertical, 4)
         } header: {
-            Text("iCloud – fast immer aktiv")
+            Text("iCloud, fast immer aktiv")
         } footer: {
-            Text("iCloud hat ein Sicherheitsnetz, das die anderen Dienste nicht bieten: Auf iCloud.com unter „Datenschutz → Kontakte wiederherstellen“ liegen Archive der letzten Wochen.")
+            Text("iCloud hat ein Sicherheitsnetz, das die anderen Dienste nicht bieten. Auf iCloud.com unter „Datenschutz → Kontakte wiederherstellen“ liegen Archive der letzten Wochen.")
         }
     }
 
@@ -128,12 +128,12 @@ struct SyncGuideView: View {
     static let icloud = SyncProvider(
         name: "iCloud",
         risk: .spreadsDeletion,
-        summary: "Spielt nichts zurück, trägt die Löschung aber auf iPad, Mac und Apple Watch weiter. Da iCloud bei fast jedem eingeschaltet ist, ist das der häufigste Fall – und der einzige, bei dem ein Swap sofort andere Geräte trifft.",
+        summary: "Spielt nichts zurück, trägt die Löschung aber auf iPad, Mac und Apple Watch weiter. iCloud ist bei fast jedem eingeschaltet und der einzige Fall, in dem ein Swap sofort andere Geräte trifft.",
         steps: [
             "Einstellungen öffnen und ganz oben auf den eigenen Namen tippen.",
             "„iCloud“ → „Kontakte“ (gegebenenfalls erst „Alle anzeigen“).",
             "Schalter ausschalten und „Auf meinem iPhone behalten“ wählen.",
-            "Nach der Recherche wieder einschalten – dann auf Dubletten achten."
+            "Nach der Recherche wieder einschalten und auf Dubletten achten."
         ]
     )
 
@@ -146,13 +146,13 @@ struct SyncGuideView: View {
                 "Einstellungen → Apps → Kontakte → Kontakte-Accounts.",
                 "Google-Account antippen.",
                 "Schalter „Kontakte“ ausschalten.",
-                "„Von meinem iPhone löschen“ bestätigen – bei Google bleibt alles erhalten."
+                "„Von meinem iPhone löschen“ bestätigen. Bei Google bleibt alles erhalten."
             ]
         ),
         SyncProvider(
             name: "Exchange / Microsoft 365",
             risk: .returnsContacts,
-            summary: "Dienstliche Postfächer. Ob gelöschte Kontakte zurückkommen, hängt von den Server-Richtlinien ab – verlassen sollte man sich darauf nicht.",
+            summary: "Dienstliche Postfächer. Ob gelöschte Kontakte zurückkommen, hängt von den Server-Richtlinien ab. Verlassen sollte man sich darauf nicht.",
             steps: [
                 "Einstellungen → Apps → Kontakte → Kontakte-Accounts.",
                 "Exchange- oder Microsoft-365-Account antippen.",
@@ -162,7 +162,7 @@ struct SyncGuideView: View {
         SyncProvider(
             name: "CardDAV (Nextcloud, IONOS, Fastmail …)",
             risk: .returnsContacts,
-            summary: "Die stille Kategorie: einmal eingerichtet, läuft sie unauffällig weiter. Eigene Server wie Nextcloud gehören genauso dazu wie CardDAV bei Mail-Anbietern.",
+            summary: "Wird leicht übersehen: Einmal eingerichtet, läuft der Abgleich unauffällig weiter. Dazu zählen eigene Server wie Nextcloud und CardDAV bei Mail-Anbietern.",
             steps: [
                 "Einstellungen → Apps → Kontakte → Kontakte-Accounts.",
                 "Jeden Eintrag prüfen, der nicht Apple, Google oder Exchange ist.",
@@ -181,7 +181,7 @@ struct SyncGuideView: View {
         SyncProvider(
             name: "LDAP und SIM-Karte",
             risk: .harmless,
-            summary: "Beide brauchen keine Beachtung: LDAP durchsucht nur ein Verzeichnis, ohne etwas ins Adressbuch zu schreiben. SIM-Kontakte werden einmalig importiert und synchronisieren nicht.",
+            summary: "Beide brauchen keine Beachtung. LDAP durchsucht nur ein Verzeichnis, ohne etwas ins Adressbuch zu schreiben. SIM-Kontakte werden einmalig importiert und synchronisieren nicht.",
             steps: []
         )
     ]

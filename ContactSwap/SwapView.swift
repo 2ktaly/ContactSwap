@@ -160,9 +160,9 @@ struct SwapView: View {
         let remove = store.deviceContacts.count - keptIDs.count
 
         if keptIDs.isEmpty {
-            return "Alle \(store.deviceContacts.count) Kontakte werden entfernt. Ein Backup wird vorher automatisch angelegt – nichts geht verloren."
+            return "Alle \(store.deviceContacts.count) Kontakte werden entfernt. Vorher legt die App ein Backup an, nichts geht verloren."
         }
-        return "\(remove) Kontakte werden entfernt, \(keptIDs.count) bleiben. Ein Backup wird vorher automatisch angelegt."
+        return "\(remove) Kontakte werden entfernt, \(keptIDs.count) bleiben. Vorher legt die App ein Backup an."
     }
 
     /// Ohne diesen Zusatz wirkt der Swap wie eine rein lokale Aktion –
@@ -239,7 +239,7 @@ struct SyncWarningRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(sources.count == 1 ? "Eine Quelle synchronisiert" : "\(sources.count) Quellen synchronisieren")
                     .font(.subheadline.bold())
-                Text("\(names) – Löschungen wirken dort und auf allen verbundenen Geräten. Unter „Einstellungen“ nachsehen.")
+                Text("\(names). Löschungen wirken dort und auf allen verbundenen Geräten. Unter „Einstellungen“ nachsehen.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

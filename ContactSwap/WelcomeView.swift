@@ -25,21 +25,21 @@ struct WelcomeView: View {
                         symbol: "lock.iphone",
                         tint: .green,
                         title: "Ausschließlich auf diesem Gerät",
-                        text: "Alle Kontakte werden lokal verarbeitet und verschlüsselt auf dem iPhone gesichert. Die App sendet nichts ins Netz – es gibt kein Konto, keinen Server, keine Auswertung."
+                        text: "Alle Kontakte werden lokal verarbeitet und verschlüsselt auf dem iPhone gesichert. Die App sendet nichts ins Netz und hat kein Benutzerkonto."
                     )
 
                     PromiseRow(
                         symbol: "arrow.uturn.backward.circle.fill",
                         tint: .orange,
                         title: "Nichts geht verloren",
-                        text: "Vor jedem Leeren legt die App automatisch ein vollständiges Backup an. Unter „Zurück“ lässt es sich jederzeit wieder einspielen."
+                        text: "Vor jedem Leeren legt die App ein vollständiges Backup an. Unter „Zurück“ spielst du es jederzeit wieder ein."
                     )
 
                     PromiseRow(
                         symbol: "curlybraces",
                         tint: .purple,
                         title: "Nachprüfbar",
-                        text: "Der Quelltext ist offengelegt. Wer will, kann selbst nachlesen, dass keine Daten das Gerät verlassen."
+                        text: "Der Quelltext ist offengelegt. Jeder kann nachlesen, dass keine Daten das Gerät verlassen."
                     )
                 }
                 .padding(.horizontal, 28)
@@ -91,8 +91,8 @@ struct WelcomeView: View {
 private struct PromiseRow: View {
     let symbol: String
     let tint: Color
-    let title: String
-    let text: String
+    let title: LocalizedStringKey
+    let text: LocalizedStringKey
 
     var body: some View {
         HStack(alignment: .top, spacing: 16) {

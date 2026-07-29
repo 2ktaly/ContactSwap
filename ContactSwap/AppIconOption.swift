@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import UIKit
 
 /// Ein wählbares App-Icon.
@@ -10,7 +11,7 @@ import UIKit
 struct AppIconOption: Identifiable, Sendable {
     /// Der Name im Asset-Katalog. `nil` steht für das Standard-Icon.
     let name: String?
-    let title: String
+    let title: LocalizedStringKey
     let previewAsset: String
 
     var id: String { name ?? "default" }

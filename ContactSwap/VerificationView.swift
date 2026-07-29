@@ -66,7 +66,7 @@ struct VerificationView: View {
 
                 if report.notesSkipped {
                     Section("Bekannte Einschränkung") {
-                        Text("Kontaktnotizen sind nicht enthalten. Apple gibt das Feld nur mit dem gesondert zu beantragenden Entitlement „com.apple.developer.contacts.notes“ frei – alle übrigen Felder werden vollständig gesichert.")
+                        Text("Kontaktnotizen sind nicht enthalten. Apple gibt das Feld nur mit dem gesondert zu beantragenden Entitlement „com.apple.developer.contacts.notes“ frei. Alle übrigen Felder werden vollständig gesichert.")
                             .font(.footnote)
                             .foregroundStyle(.secondary)
                     }

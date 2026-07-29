@@ -15,7 +15,7 @@ struct RestoreView: View {
                     ContentUnavailableView(
                         "Kein Backup vorhanden",
                         systemImage: "tray",
-                        description: Text("Sobald du unter „Swap“ das Adressbuch leerst, legt die App automatisch ein Backup an – es erscheint dann hier.")
+                        description: Text("Sobald du unter „Swap“ das Adressbuch leerst, legt die App ein Backup an. Es erscheint dann hier.")
                     )
                 } else {
                     backupList
@@ -133,8 +133,8 @@ struct BackupRow: View {
                 .font(.headline)
 
             HStack(spacing: 12) {
-                Label("\(backup.contactCount)", systemImage: "person.2.fill")
-                Label("\(backup.photoCount)", systemImage: "photo.fill")
+                Label { Text(verbatim: "\(backup.contactCount)") } icon: { Image(systemName: "person.2.fill") }
+                Label { Text(verbatim: "\(backup.photoCount)") } icon: { Image(systemName: "photo.fill") }
                 if backup.totalPhotosSizeBytes > 0 {
                     Text(backup.formattedSize)
                 }
